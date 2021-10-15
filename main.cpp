@@ -25,11 +25,11 @@ int windowNum = 0;
 int numOfDirectoryRows = 0;
 int minAllowedXCoord = 1;
 int maxAllowedXCoord = 5;
-int startWindow = 0;
+int startWindow = 0; // display content of directory starting from 0th index of vector
 int endWindow = 4;
-int currentCursorIndex = 1;
+int currentCursorIndex = 1;  // store current row of the cursor
 int oldXCoordinate;
-int permittedRowsInTerminal = 5;
+int permittedRowsInTerminal = 5; // max rows to display in the terminal
 int maxRowInTerminal;
 int xCoord = 1;
 int yCoord = 0;
@@ -42,9 +42,11 @@ string rootPath() {
    return cwd;
 }
 
+// rootDir is the path in which the project started
 string rootDir = rootPath();
 string currentPath = "" + rootDir;
 
+/* blueprint for storing files and directories and all their configs */
 class DirectoryContents {
 	string filename;
 	string fileSize;
@@ -96,10 +98,7 @@ public:
 };
 
 
-// showDirectoryLayout() {
-
-// }
-
+// convert size of file and dir in human readable format
 char* readable_fs(double size, char *buf) {
     int i = 0;
     const char* units[] = {"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"};
@@ -129,6 +128,7 @@ char* getPermissions(mode_t mode, char type) {
     return permissions; 
 }
 
+// print directory content on terminal
 void outputDirectoryContent(DirectoryContents temp) { 
 	printf("%s\t", temp.getFileName().c_str());
 	printf("\t%s", temp.getPermissions().c_str());
@@ -186,6 +186,7 @@ bool compareFileName(DirectoryContents obj1, DirectoryContents obj2) {
 	return (obj1.getFileName() < obj2.getFileName());
 }
 
+// create a vector of contents of a directory
 vector<DirectoryContents> loadDirectoryContent(string path, vector<DirectoryContents> dirStub) {
 	DIR *dir; 
 	struct dirent *diread;
@@ -224,6 +225,8 @@ vector<DirectoryContents> loadDirectoryContent(string path, vector<DirectoryCont
     return dirStub;
 }
 
+
+// parsing the input command passed in command mode
 vector<string> parseInput(string input) {
 	string word = "";
 	vector<string> commandString;
@@ -247,6 +250,7 @@ vector<string> parseInput(string input) {
 }
 
 
+// utility to copy file to destination
 void copyFile(string source, struct stat s, string destination) {
 	
 	string srcPath = source;
@@ -300,6 +304,7 @@ void copyFile(string source, struct stat s, string destination) {
 }
 
 
+// delete file
 void removeFile(string source) {
 	
 	char *path = new char[source.length() + 1];
@@ -310,7 +315,7 @@ void removeFile(string source) {
 	}
 }
 
-
+// copy directory and its content recursively to the destination
 void copyDirectory(string source, struct stat s, string destination) {
 	
 	string srcPath = source;
@@ -369,7 +374,7 @@ void copyDirectory(string source, struct stat s, string destination) {
     }
 }
 
-
+// remove directory and its content recursively from the given source
 void removeDirectory(string source) {
 	
 	string srcPath = source;
@@ -438,6 +443,8 @@ void createDirectory(string source, string destination) {
 }
 
 vector<DirectoryContents> dirStub;
+
+// clear the screen and print contents in the directory in current path
 void refreshScreen() {
 	dirStub.clear();
 	dirStub = loadDirectoryContent(currentPath, dirStub);
@@ -448,12 +455,14 @@ void refreshScreen() {
 	yCoord = 0;
 }
 
+// clear the command tab aftyer every command executed
 void refreshCommandTab() {
 	printf("%c[%d;%dH",27, maxRowInTerminal, 1);
 	printf("%c[2K", 27);
 	cout<<":";
 }
 
+// display error in command tab 
 void refreshCommandTabWithError(string errMsg) {
 	printf("%c[%d;%dH",27, maxRowInTerminal, 1);
 	printf("%c[2K", 27);
@@ -468,6 +477,7 @@ bool startsWith(string mainStr, string prefix) {
         return false;
 }
 
+// utility to extract parent directory from current Path
 void setCurrentPathToParent() {
 	if(currentPath == rootDir) {
 		return;
@@ -482,7 +492,7 @@ void setCurrentPathToParent() {
     }
 }
 
-
+// utility to search for a file or directory name in specified directory recursively
 bool searchCurrentDirectory(string source, bool found, string keyword) {
 	vector<DirectoryContents> tempStub;
 
@@ -531,6 +541,8 @@ bool searchCurrentDirectory(string source, bool found, string keyword) {
 
 string rootDirRep = "~";
 string prevDirRep = "..";
+
+// entering into command mode
 void enterCommandMode(int permittedRowsInTerminal) {
 	
 	vector<string> command;
@@ -803,6 +815,7 @@ void enterCommandMode(int permittedRowsInTerminal) {
 	}
 }
 
+// clear the screen when in normal mode after executing each instruction
 void clearScreen() {
 	printf("\033[H\033[J");
 	printf("%c[%d;%dH", 27, 1, 1);
@@ -843,17 +856,18 @@ int main(int argc, char * argv[]) {
 
     while(1) {
     	key = cin.get();
+    	// up arrow key
     	if (key ==  'A') {
     		if(xCoord > minAllowedXCoord) {
 	    		xCoord--;
 	    		setCursorPosition(xCoord, yCoord);
     		}
-    	} else if (key == 'B') {
+    	} else if (key == 'B') {                  // Down Arrow Key
     		if(xCoord < maxAllowedXCoord) {
 	    		xCoord++;
 	    		setCursorPosition(xCoord, yCoord);
     		}
-    	} else if (key == 'l') {
+    	} else if (key == 'l') {           // scroll down
     		if(startWindow < dirStub.size() - 1 && 
     			endWindow < dirStub.size() - 1) {
     			startWindow++;
@@ -865,7 +879,7 @@ int main(int argc, char * argv[]) {
     		
     		refreshScreen();
 
-    	} else if (key == 'k') {
+    	} else if (key == 'k') {            // scroll up
     		if(startWindow > 0 && 
     			endWindow > 4) {
     			startWindow--;
@@ -877,7 +891,7 @@ int main(int argc, char * argv[]) {
     		
     		refreshScreen();
 
-    	} else if (key == 10) {
+    	} else if (key == 10) {                // enter key pressed
     		index = startWindow + xCoord - 1;
     		oldCurrentPath = "" + currentPath;
     		if(startsWith(dirStub[index].getFileName(), "..")) {
@@ -958,7 +972,7 @@ int main(int argc, char * argv[]) {
     			startWindow = 0;
 	    		endWindow = 4;
     		}
-    	} else if (key == 104 || key == 72) {
+    	} else if (key == 104 || key == 72) {          // Home or H key
     		if(currentPath != rootDir) {
     			currentPath = rootDir;
     			visitedDirectoryRecord.push_back(currentPath);
@@ -973,7 +987,7 @@ int main(int argc, char * argv[]) {
 	    		endWindow = 4;
     		}
     	} else if (key == 127) {
-
+            // BACKSPACE KEY PRESSED
     		if(currentPath == rootDir) {
     			continue;
     		}
@@ -988,7 +1002,7 @@ int main(int argc, char * argv[]) {
             startWindow = 0;
 	    	endWindow = 4;
     	
-    	} else if (key == 58) {
+    	} else if (key == 58) {                  // initialize command mode
     		refreshCommandTab();
 			enterCommandMode(permittedRowsInTerminal);
 
@@ -1000,6 +1014,7 @@ int main(int argc, char * argv[]) {
 			startWindow = 0;
 	    	endWindow = 4;
     	} else if(key == 'q') {
+    		// EXIT the application
     		clearScreen();
     		break;
     	}
