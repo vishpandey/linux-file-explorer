@@ -111,31 +111,31 @@ char* readable_fs(double size, char *buf) {
 }
 
 char* getPermissions(mode_t mode, char type) {
-	char* permissions = (char *)malloc(sizeof(char) * 11 + 1);
+	char* permissions = (char *)malloc(sizeof(char) * 10 + 1);
 
 	permissions[0] = (type == 'd') ? 'd' : '-';
 	permissions[1] = (mode & S_IRUSR) ? 'r' : '-';
     permissions[2] = (mode & S_IWUSR) ? 'w' : '-';
     permissions[3] = (mode & S_IXUSR) ? 'x' : '-';
-    permissions[5] = (mode & S_IRGRP) ? 'r' : '-';
-    permissions[6] = (mode & S_IWGRP) ? 'w' : '-';
-    permissions[7] = (mode & S_IXGRP) ? 'x' : '-';
-    permissions[8] = (mode & S_IROTH) ? 'r' : '-';
-    permissions[9] = (mode & S_IWOTH) ? 'w' : '-';
-    permissions[10] = (mode & S_IXOTH) ? 'x' : '-';
-    permissions[11] = '\0';
+    permissions[4] = (mode & S_IRGRP) ? 'r' : '-';
+    permissions[5] = (mode & S_IWGRP) ? 'w' : '-';
+    permissions[6] = (mode & S_IXGRP) ? 'x' : '-';
+    permissions[7] = (mode & S_IROTH) ? 'r' : '-';
+    permissions[8] = (mode & S_IWOTH) ? 'w' : '-';
+    permissions[9] = (mode & S_IXOTH) ? 'x' : '-';
+    permissions[10] = '\0';
     
     return permissions; 
 }
 
 // print directory content on terminal
 void outputDirectoryContent(DirectoryContents temp) { 
-	printf("%s\t", temp.getFileName().c_str());
-	printf("\t%s", temp.getPermissions().c_str());
-	printf("\t%s", temp.getGroupOwner().c_str());
-	printf("\t%s", temp.getUserOwner().c_str());
-	printf("\t%s", temp.getFileSize().c_str());
-	printf("\t%s", temp.getLastModified().c_str());
+	printf("%s", temp.getPermissions().c_str());
+	printf("\t%-8s", temp.getGroupOwner().c_str());
+	printf("%-8s", temp.getUserOwner().c_str());
+	printf("%10s", temp.getFileSize().c_str());
+	printf("%30s", temp.getFileName().c_str());
+	printf("\t%-20s", temp.getLastModified().c_str());
 } 
 
 void displayDirectoryContents(vector<DirectoryContents> dirStub) {
